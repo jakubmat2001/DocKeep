@@ -1,6 +1,6 @@
 # Program Developed And Tested By; Jakub Matusik
-# Application Version; 1.2.1
-# 21/09/2021
+# Application Version; 1.2.2
+# 27/09/2021
 
 # list of libraries used in the application and their use
 # tkinter; building GUI for application
