@@ -11,6 +11,7 @@ import tkinter as tk
 import pandas as pd
 import string
 import dict_data
+import datetime
 
 # various fonts used for label widgets
 App_font = ("Sans-Serif", 13)
@@ -208,7 +209,7 @@ class result(tk.Frame):
                     start_up.close()
 
                     dict_data.export_data()
-                    result.pick_sheet_name(self)
+                    result.export(self)
                     
                     dict_data.reset_filedata_dict()
                     controller.show_frame(mainpage_raised.mainpage)
@@ -296,32 +297,8 @@ class result(tk.Frame):
         except Exception:
             pass
 
-    # lets a user to pick a name for a trade that they wish to file
-    def pick_sheet_name(self):
-        global sheet_top, sheet_popup_entry
-        sheet_top = tk.Toplevel(self)
-        sheet_top.title("Select Sheet")
-        sheet_top.geometry("250x150")
+    
         
-        bal_popup_lbl = tk.Label(sheet_top, text="Enter name of the sheet, to save it")
-        bal_popup_lbl.pack(pady=5)
-
-        sheet_popup_entry = tk.Entry(sheet_top, width=9, textvariable = self.sheet_val)
-        sheet_popup_entry.pack(pady=5)
-
-        sheet_pop_up_bt = ttk.Button(sheet_top, text="OK", command=lambda:result.verify_entered_sheet_name(self, sheet_top, sheet_popup_entry))
-        sheet_pop_up_bt.pack(pady=5)
-        
-    # validation checks for the data entered into entry box by a user when entering name for the filed trade
-    def verify_entered_sheet_name(self, sheet_top, sheet_popup_entry):
-        if self.sheet_val.get() == "":
-            messagebox.showinfo("Box Empty", "Failed To Name The Trade\n     Please Name A Trade")
-        elif len(self.sheet_val.get()) >= 15:
-            messagebox.showinfo("Too Long", "Please Keep The Name Shorter Than 15 Characters")
-        else:
-            sheet_top.destroy()
-            result.export(self, sheet_popup_entry)
-        return self.sheet_val
         
     # loads in the data from the dict_data.ready_for_export dictionary into excel workbook and uploads it in the pandas dataframe
     # if the workbook doesn't exist, it creates one and uploads the data
@@ -329,101 +306,99 @@ class result(tk.Frame):
     # some concepts of this functions have been borrowed from the internet
     # such as creating a new worksheet if at least one already exists in the workbook
     # function was modified to add images to the chart 
-    def export(self, sheet_popup_entry):
+    def export(self):
         dict_data.filetrade = open("ft_data", "rb")
         dict_data.get_filedict_data = pickle.load(dict_data.filetrade)
         self.upload_pass = False
         self.cont_export = False
 
+        current_date_time = datetime.datetime.now()
+        formated_year = str(current_date_time.year)
+        formated_year = formated_year[2:]
+        current_date = str(current_date_time.day) + "-" +  str(current_date_time.month) + "-" + str(formated_year)
+        filename = 'ForexTrades.xlsx'
+        
         try:
-            new_sheet_name = self.sheet_val.get()
-            user_assigned_name = new_sheet_name.split()
-            raw_sheet_name = str.maketrans("", "", string.punctuation)
-            sheet_name_output = [w.translate(raw_sheet_name) for w in user_assigned_name]
-            sheet_name = sheet_name_output[0]
-            print(sheet_name)
-
-            filename = 'ForexTrades.xlsx'
-            
             wb = pxl.load_workbook(filename)
-            if sheet_name in wb.sheetnames:
-                messagebox.showinfo("Sheet Found", "Worksheet with that name already exists in the workbook")
-                result.pick_sheet_name(self)
-            else:
-                book = pxl.load_workbook(filename)
-                writer = pd.ExcelWriter(filename, engine='openpyxl')
-                writer.book = book
-                
-                data = {'Pair': [dict_data.ready_for_export.get("Pair")], 'Lot-size': [dict_data.ready_for_export.get("Lot-size")], 'Buy-sell': [dict_data.ready_for_export.get("Buy-sell")],
-                            'Open': [dict_data.ready_for_export.get("Open")], 'Close': [dict_data.ready_for_export.get("Close")], 'Balance': [("£" + str(dict_data.ready_for_export.get("Balance")))],
-                            'Pos-size': [dict_data.ready_for_export.get("Pos-size")], 'Loss-gain': [("£" + str(dict_data.ready_for_export.get("Loss-gain")))], '4-hour': [dict_data.ready_for_export.get("4-hour")],
-                            '1-hour': [dict_data.ready_for_export.get("1-hour")], '15-min': [dict_data.ready_for_export.get("15-min")], 'Result': [dict_data.ready_for_export.get("Result-chart")]}
-                df = pd.DataFrame(data)
-                df.to_excel(writer, sheet_name, index=False)
+            sheet_count = len(wb.sheetnames)
+            sheet_name = str(current_date) + " " + "-" + " " + str(sheet_count)
+            
+            book = pxl.load_workbook(filename)
+            writer = pd.ExcelWriter(filename, engine='openpyxl')
+            writer.book = book
+            
+            data = {'Pair': [dict_data.ready_for_export.get("Pair")], 'Lot-size': [dict_data.ready_for_export.get("Lot-size")], 'Buy-sell': [dict_data.ready_for_export.get("Buy-sell")],
+                        'Open': [dict_data.ready_for_export.get("Open")], 'Close': [dict_data.ready_for_export.get("Close")], 'Balance': [("£" + str(dict_data.ready_for_export.get("Balance")))],
+                        'Pos-size': [dict_data.ready_for_export.get("Pos-size")], 'Loss-gain': [("£" + str(dict_data.ready_for_export.get("Loss-gain")))], '4-hour': [dict_data.ready_for_export.get("4-hour")],
+                        '1-hour': [dict_data.ready_for_export.get("1-hour")], '15-min': [dict_data.ready_for_export.get("15-min")], 'Result': [dict_data.ready_for_export.get("Result-chart")]}
+            df = pd.DataFrame(data)
+            df.to_excel(writer, sheet_name, index=False)
 
-                workbook = writer.book
-                worksheet = writer.sheets[sheet_name]
+            workbook = writer.book
+            worksheet = writer.sheets[sheet_name]
 
-                try:
-                    worksheet.column_dimensions["I"].width = 150
-                    four_h_display = Image.open(dict_data.ready_for_export.get("4-hour"))
-                    img = pxl.drawing.image.Image(four_h_display)
-                    img.width = 1050
-                    img.height = 600
-                    img.anchor = "I2"
-                    worksheet.add_image(img)
-                except Exception:
-                    pass
+            try:
+                worksheet.column_dimensions["I"].width = 150
+                four_h_display = Image.open(dict_data.ready_for_export.get("4-hour"))
+                img = pxl.drawing.image.Image(four_h_display)
+                img.width = 1050
+                img.height = 600
+                img.anchor = "I2"
+                worksheet.add_image(img)
+            except Exception:
+                pass
 
-                try:
-                    worksheet.column_dimensions["J"].width = 150
-                    disp_img = Image.open(dict_data.ready_for_export.get("1-hour"))
-                    img = pxl.drawing.image.Image(disp_img)
-                    img.width = 1050
-                    img.height = 600
-                    img.anchor = "J2"
-                    worksheet.add_image(img)
-                except Exception:
-                    pass
+            try:
+                worksheet.column_dimensions["J"].width = 150
+                disp_img = Image.open(dict_data.ready_for_export.get("1-hour"))
+                img = pxl.drawing.image.Image(disp_img)
+                img.width = 1050
+                img.height = 600
+                img.anchor = "J2"
+                worksheet.add_image(img)
+            except Exception:
+                pass
 
-                try:
-                    worksheet.column_dimensions["K"].width = 150
-                    disp_img = Image.open(dict_data.ready_for_export.get("15-min"))
-                    img = pxl.drawing.image.Image(disp_img)
-                    img.width = 1050
-                    img.height = 600
-                    img.anchor = "K2"
-                    worksheet.add_image(img)
-                except Exception:
-                    pass
+            try:
+                worksheet.column_dimensions["K"].width = 150
+                disp_img = Image.open(dict_data.ready_for_export.get("15-min"))
+                img = pxl.drawing.image.Image(disp_img)
+                img.width = 1050
+                img.height = 600
+                img.anchor = "K2"
+                worksheet.add_image(img)
+            except Exception:
+                pass
 
-                try:
-                    worksheet.column_dimensions["L"].width = 151
-                    disp_img = Image.open(dict_data.ready_for_export.get("Result-chart"))
-                    img = pxl.drawing.image.Image(disp_img)
-                    img.width = 1050
-                    img.height = 599
-                    img.anchor = "L2"
-                    worksheet.add_image(img)
-                except Exception:
-                    pass
+            try:
+                worksheet.column_dimensions["L"].width = 151
+                disp_img = Image.open(dict_data.ready_for_export.get("Result-chart"))
+                img = pxl.drawing.image.Image(disp_img)
+                img.width = 1050
+                img.height = 599
+                img.anchor = "L2"
+                worksheet.add_image(img)
+            except Exception:
+                pass
 
-                worksheet.merge_cells("B7:G12")
-                cell = worksheet.cell(row=7, column=2)
-                cell.value = "Notes:"
-                cell.alignment = Alignment(horizontal="left", vertical="top", wrapText=True)
+            worksheet.merge_cells("B7:G12")
+            cell = worksheet.cell(row=7, column=2)
+            cell.value = "Notes:"
+            cell.alignment = Alignment(horizontal="left", vertical="top", wrapText=True)
 
-                worksheet.merge_cells("B15:G18")
-                cell2 = worksheet.cell(row=15, column=2)
-                cell2.value = "Confluences:"
-                cell2.alignment = Alignment(horizontal="left", vertical="top", wrapText=True)
-                
-                writer.save()
-                result.delete_sheet_columns(self, filename, sheet_name)
-                result.remove_chart(self)
-                dict_data.reset_dataframe_dict()
+            worksheet.merge_cells("B15:G18")
+            cell2 = worksheet.cell(row=15, column=2)
+            cell2.value = "Confluences:"
+            cell2.alignment = Alignment(horizontal="left", vertical="top", wrapText=True)
+            
+            writer.save()
+            result.delete_sheet_columns(self, filename, sheet_name)
+            result.remove_chart(self)
+            dict_data.reset_dataframe_dict()
 
         except FileNotFoundError:
+            sheet_name = str(current_date) + " " + "-" + " " + str(1)
+
             messagebox.showinfo("No Workbook", "Failed To Find Workbook \n    Creating New One")
             data = {'Pair': [dict_data.ready_for_export.get("Pair")], 'Lot-size': [dict_data.ready_for_export.get("Lot-size")], 'Buy-sell': [dict_data.ready_for_export.get("Buy-sell")],
                             'Open': [dict_data.ready_for_export.get("Open")], 'Close': [dict_data.ready_for_export.get("Close")], 'Balance': [("£" + str(dict_data.ready_for_export.get("Balance")))],
