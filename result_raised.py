@@ -1,19 +1,14 @@
-from tkinter import EXCEPTION, messagebox
-from tkinter import ttk, filedialog
-from tkinter.constants import END, HIDDEN, INSERT
+from tkinter import messagebox
+from tkinter import ttk
 from PIL import ImageTk, Image
 import openpyxl as pxl
 from openpyxl.styles import Alignment
-from openpyxl.workbook import workbook
-import xlsxwriter 
 import pickle
 import tkinter as tk
 import pandas as pd
-import string
 import dict_data
 import datetime
 
-# various fonts used for label widgets
 App_font = ("Sans-Serif", 13)
 Body_font = ("Sans-Serif", 9)
 
@@ -23,8 +18,7 @@ class result(tk.Frame):
     def __init__(self, parent, controller):
         import  mainpage_raised ,four_hour_raised, one_hour_raised, fifteen_min_raised
         tk.Frame.__init__(self, parent)
-        
-        # empty variables waiting for data
+
         self.test_img = ""
         self.resizingImg = ""
         self.new_img = ""
@@ -180,7 +174,8 @@ class result(tk.Frame):
 
         start_vars = open("startup_vars", "rb")
         dict_data.get_dict_data = pickle.load(start_vars)
-
+    
+    # validation checks ensuring user is away their result chart hasn't been uploaded
         result.validate_uploaded_chart(self)
         if self.cont_export == True:
             if dict_data.st_values_holder.get("is_placed") == False and dict_data.st_values_holder.get("is_trade_filed") == False:
@@ -192,6 +187,7 @@ class result(tk.Frame):
                     dict_data.filetrade = open("ft_data", "rb")
                     dict_data.get_filedict_data = pickle.load(dict_data.filetrade)
 
+                    # load recently picked trade with it's parameters/values
                     dict_data.startup_load_values_to_startup()
                     dict_data.st_values_holder["is_trade_filed"] = True
                     dict_data.st_values_holder["4-hour"] = ""
@@ -204,6 +200,7 @@ class result(tk.Frame):
                     dict_data.placetrade_values_holder["15-min"] = ""
                     dict_data.placetrade_values_holder["result-chart"] = ""
 
+                    # pickele-save our start-up values for later use (incase the app closes) 
                     start_up = open("startup_vars", "wb")
                     pickle.dump(dict_data.st_values_holder, start_up)
                     start_up.close()
@@ -218,6 +215,8 @@ class result(tk.Frame):
                     
                     
                 elif q2_answer is False:
+
+                    # load recently picked trade with it's parameters/values
                     dict_data.startup_load_values_to_startup()
                     dict_data.st_values_holder["is_trade_filed"] = True
                     dict_data.st_values_holder["4-hour"] = ""
@@ -230,6 +229,7 @@ class result(tk.Frame):
                     dict_data.placetrade_values_holder["15-min"] = ""
                     dict_data.placetrade_values_holder["result-chart"] = ""
 
+                    # pickle-save our start-up values for later use (incase the app closes)
                     start_up = open("startup_vars", "wb")
                     pickle.dump(dict_data.st_values_holder, start_up)
                     start_up.close()
@@ -247,8 +247,7 @@ class result(tk.Frame):
         else:
             pass
 
-    # checks if the charts exist, if one or more do not exist
-    # the chart that is missing will be emptied
+    # check if the charts exist, if one or more do not exist, the chart that is missing will be set to NULL
     def check_if_exists(self):
         dict_data.filetrade = open("ft_data", "rb")
         dict_data.get_filedict_data = pickle.load(dict_data.filetrade)
@@ -267,7 +266,6 @@ class result(tk.Frame):
                 try:
                     self.check_img = Image.open(dict_data.get_filedict_data.get("1-hour"))
                 except Exception:
-                    messagebox.showinfo("Position", "Please Select Buy or Sell Position")
                     dict_data.fileload_values_to_filedata()
                     dict_data.ft_data["1-hour"] = ""
                     
@@ -299,187 +297,98 @@ class result(tk.Frame):
 
     
         
-        
-    # loads in the data from the dict_data.ready_for_export dictionary into excel workbook and uploads it in the pandas dataframe
-    # if the workbook doesn't exist, it creates one and uploads the data
-    # charts are resized to fit the excel file, if some charts are missing, they will simply not be uploaded
-    # some concepts of this functions have been borrowed from the internet
-    # such as creating a new worksheet if at least one already exists in the workbook
-    # function was modified to add images to the chart 
+    # loads in the data from the dict_data.ready_for_export dictionary into excel workbook and adds it to the pandas dataframe
+    # if the workbook doesn't exist, it creates new one with a current date and number representing worksheet number of "1"
+    # else if the workbook does exist, it creates new worksheet with current date and number representing the total of existing worhseets within the workbook
+    # charts & cells are resized to fit in the resized excel cell, if any chart is missing, they will end-up not beeing uploaded
     def export(self):
-        dict_data.filetrade = open("ft_data", "rb")
-        dict_data.get_filedict_data = pickle.load(dict_data.filetrade)
-        self.upload_pass = False
-        self.cont_export = False
+        with open("ft_data", "rb") as filetrade:
+            dict_data.get_filedict_data = pickle.load(filetrade)
 
         current_date_time = datetime.datetime.now()
-        formated_year = str(current_date_time.year)
-        formated_year = formated_year[2:]
-        current_date = str(current_date_time.day) + "-" +  str(current_date_time.month) + "-" + str(formated_year)
+        formatted_year = str(current_date_time.year)[2:]
+        current_date = str(current_date_time.day) + "-" + str(current_date_time.month) + "-" + formatted_year
         filename = 'ForexTrades.xlsx'
-        
+
+    # checks if the sheetname with a current date already exisits within the workbook
+    # if sheet name does exist, new name is assigned to it with a current date and number count representing the ith trade placed on that day
+    # trades filed on a new day will have number starting from '1' assigned to their trade sheet name 
         try:
-            wb = pxl.load_workbook(filename)
-            sheet_count = len(wb.sheetnames)
-            sheet_name = str(current_date) + " " + "-" + " " + str(sheet_count)
-            
             book = pxl.load_workbook(filename)
-            writer = pd.ExcelWriter(filename, engine='openpyxl')
-            writer.book = book
-            
-            data = {'Pair': [dict_data.ready_for_export.get("Pair")], 'Lot-size': [dict_data.ready_for_export.get("Lot-size")], 'Buy-sell': [dict_data.ready_for_export.get("Buy-sell")],
-                        'Open': [dict_data.ready_for_export.get("Open")], 'Close': [dict_data.ready_for_export.get("Close")], 'Balance': [("£" + str(dict_data.ready_for_export.get("Balance")))],
-                        'Pos-size': [dict_data.ready_for_export.get("Pos-size")], 'Loss-gain': [("£" + str(dict_data.ready_for_export.get("Loss-gain")))], '4-hour': [dict_data.ready_for_export.get("4-hour")],
-                        '1-hour': [dict_data.ready_for_export.get("1-hour")], '15-min': [dict_data.ready_for_export.get("15-min")], 'Result': [dict_data.ready_for_export.get("Result-chart")]}
-            df = pd.DataFrame(data)
-            df.to_excel(writer, sheet_name, index=False)
+            i = 1
+            sheet_name = str(current_date) + " - " + str(i)
+            while sheet_name in book.sheetnames:
+                i += 1
+                sheet_name = str(current_date) + " - " + str(i)
+                
 
-            workbook = writer.book
-            worksheet = writer.sheets[sheet_name]
-
-            try:
-                worksheet.column_dimensions["I"].width = 150
-                four_h_display = Image.open(dict_data.ready_for_export.get("4-hour"))
-                img = pxl.drawing.image.Image(four_h_display)
-                img.width = 1050
-                img.height = 600
-                img.anchor = "I2"
-                worksheet.add_image(img)
-            except Exception:
-                pass
-
-            try:
-                worksheet.column_dimensions["J"].width = 150
-                disp_img = Image.open(dict_data.ready_for_export.get("1-hour"))
-                img = pxl.drawing.image.Image(disp_img)
-                img.width = 1050
-                img.height = 600
-                img.anchor = "J2"
-                worksheet.add_image(img)
-            except Exception:
-                pass
-
-            try:
-                worksheet.column_dimensions["K"].width = 150
-                disp_img = Image.open(dict_data.ready_for_export.get("15-min"))
-                img = pxl.drawing.image.Image(disp_img)
-                img.width = 1050
-                img.height = 600
-                img.anchor = "K2"
-                worksheet.add_image(img)
-            except Exception:
-                pass
-
-            try:
-                worksheet.column_dimensions["L"].width = 151
-                disp_img = Image.open(dict_data.ready_for_export.get("Result-chart"))
-                img = pxl.drawing.image.Image(disp_img)
-                img.width = 1050
-                img.height = 599
-                img.anchor = "L2"
-                worksheet.add_image(img)
-            except Exception:
-                pass
-
-            worksheet.merge_cells("B7:G12")
-            cell = worksheet.cell(row=7, column=2)
-            cell.value = "Notes:"
-            cell.alignment = Alignment(horizontal="left", vertical="top", wrapText=True)
-
-            worksheet.merge_cells("B15:G18")
-            cell2 = worksheet.cell(row=15, column=2)
-            cell2.value = "Confluences:"
-            cell2.alignment = Alignment(horizontal="left", vertical="top", wrapText=True)
-            
-            writer.save()
-            result.delete_sheet_columns(self, filename, sheet_name)
-            result.remove_chart(self)
-            dict_data.reset_dataframe_dict()
-
+            writer = pd.ExcelWriter(filename, engine='openpyxl', mode='a')
+            self.write_to_excel(filename, writer, sheet_name)
         except FileNotFoundError:
-            sheet_name = str(current_date) + " " + "-" + " " + str(1)
-
+            sheet_name = str(current_date) + " - " + str(1)
             messagebox.showinfo("No Workbook", "Failed To Find Workbook \n    Creating New One")
-            data = {'Pair': [dict_data.ready_for_export.get("Pair")], 'Lot-size': [dict_data.ready_for_export.get("Lot-size")], 'Buy-sell': [dict_data.ready_for_export.get("Buy-sell")],
-                            'Open': [dict_data.ready_for_export.get("Open")], 'Close': [dict_data.ready_for_export.get("Close")], 'Balance': [("£" + str(dict_data.ready_for_export.get("Balance")))],
-                            'Pos-size': [dict_data.ready_for_export.get("Pos-size")], 'Loss-gain': [("£" + str(dict_data.ready_for_export.get("Loss-gain")))], '4-hour': [dict_data.ready_for_export.get("4-hour")],
-                            '1-hour': [dict_data.ready_for_export.get("1-hour")], '15-min': [dict_data.ready_for_export.get("15-min")], 'Result': [dict_data.ready_for_export.get("Result-chart")]}
-            df = pd.DataFrame(data)
             writer = pd.ExcelWriter(filename, engine='openpyxl')
-            df.to_excel(writer, sheet_name, index=False)
+            self.write_to_excel(filename, writer, sheet_name)
+    
 
-            workbook = writer.book
-            worksheet = writer.sheets[sheet_name]
+    def write_to_excel(self, filename, writer, sheet_name):
+        data = {'Pair': [dict_data.ready_for_export.get("Pair")], 'Lot-size': [dict_data.ready_for_export.get("Lot-size")], 'Buy-sell': [dict_data.ready_for_export.get("Buy-sell")],
+                'Open': [dict_data.ready_for_export.get("Open")], 'Close': [dict_data.ready_for_export.get("Close")], 'Balance': [("£" + str(dict_data.ready_for_export.get("Balance")))],
+                'Pos-size': [dict_data.ready_for_export.get("Pos-size")], 'Loss-gain': [("£" + str(dict_data.ready_for_export.get("Loss-gain")))], '4-hour': [dict_data.ready_for_export.get("4-hour")],
+                '1-hour': [dict_data.ready_for_export.get("1-hour")], '15-min': [dict_data.ready_for_export.get("15-min")], 'Result': [dict_data.ready_for_export.get("Result-chart")]}
+        
+        df = pd.DataFrame(data)
+        df.to_excel(writer, sheet_name, index=False)
+        worksheet = writer.sheets[sheet_name]
 
-            try:
-                worksheet.column_dimensions["I"].width = 150
-                four_h_display = Image.open(dict_data.ready_for_export.get("4-hour"))
-                img = pxl.drawing.image.Image(four_h_display)
-                img.width = 1050
-                img.height = 600
-                img.anchor = "I2"
-                worksheet.add_image(img)
-            except Exception:
-                pass
-
-            try:
-                worksheet.column_dimensions["J"].width = 150
-                disp_img = Image.open(dict_data.ready_for_export.get("1-hour"))
-                img = pxl.drawing.image.Image(disp_img)
-                img.width = 1050
-                img.height = 600
-                img.anchor = "J2"
-                worksheet.add_image(img)
-            except Exception:
-                pass
-
-            try:
-                worksheet.column_dimensions["K"].width = 150
-                disp_img = Image.open(dict_data.ready_for_export.get("15-min"))
-                img = pxl.drawing.image.Image(disp_img)
-                img.width = 1050
-                img.height = 600
-                img.anchor = "K2"
-                worksheet.add_image(img)
-            except Exception:
-                pass
-            
-            try:
-                worksheet.column_dimensions["L"].width = 151
-                disp_img = Image.open(dict_data.ready_for_export.get("Result-chart"))
-                img = pxl.drawing.image.Image(disp_img)
-                img.width = 1050
-                img.height = 599
-                img.anchor = "L2"
-                worksheet.add_image(img)
-            except Exception:
-                pass
-
-            worksheet.merge_cells("B7:G12")
-            cell = worksheet.cell(row=7, column=2)
-            cell.value = "Notes:"
-            cell.alignment = Alignment(horizontal="left", vertical="top", wrapText=True)
-
-            worksheet.merge_cells("B15:G18")
-            cell2 = worksheet.cell(row=15, column=2)
-            cell2.value = "Confluences:"
-            cell2.alignment = Alignment(horizontal="left", vertical="top", wrapText=True)
-
-            writer.save()
-            result.delete_sheet_columns(self, filename, sheet_name)
-            result.remove_chart(self)
-            dict_data.reset_dataframe_dict()
+        try:
+            four_h = dict_data.ready_for_export.get("4-hour")
+            one_h = dict_data.ready_for_export.get("1-hour")
+            fifteen_min = dict_data.ready_for_export.get("15-min")
+            result_chart = dict_data.ready_for_export.get("Result-chart")
         except Exception:
             pass
-        
 
-    
+        self.add_image(worksheet, "I", four_h)
+        self.add_image(worksheet, "J", one_h)
+        self.add_image(worksheet, "K", fifteen_min)
+        self.add_image(worksheet, "L", result_chart)
+
+    # Resizes cells to accomodate space for user typed notes and confuluences for each filed trade
+        worksheet.merge_cells("B7:G12")
+        cell = worksheet.cell(row=7, column=2)
+        cell.value = "Notes:"
+        cell.alignment = Alignment(horizontal="left", vertical="top", wrapText=True)
+
+        worksheet.merge_cells("B15:G18")
+        cell2 = worksheet.cell(row=15, column=2)
+        cell2.value = "Confluences:"
+        cell2.alignment = Alignment(horizontal="left", vertical="top", wrapText=True)
+        
+        writer.close()
+        self.delete_sheet_columns(filename, sheet_name)
+
+
+    # Get's rid of all unused columns in excel spreadsheet
     def delete_sheet_columns(self, filename, sheet_name):
         book = pxl.load_workbook(filename)
-        sheet = book[sheet_name]       
-
+        sheet = book[sheet_name]
         sheet.column_dimensions.group(start='M', end='XFD', hidden=True)
         book.save(filename)
+
+
+    # Resizes cells and adds image to a cell if added
+    def add_image(self, worksheet, column, file):
+        try:
+            worksheet.column_dimensions[column].width = 150
+            img_display = Image.open(file)
+            img = pxl.drawing.image.Image(img_display)
+            img.width = 1050
+            img.height = 600
+            img.anchor = f"{column}2"
+            worksheet.add_image(img)
+        except Exception:
+            pass
         
 
 

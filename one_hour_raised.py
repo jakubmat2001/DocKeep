@@ -54,7 +54,7 @@ class one_hour(tk.Frame):
         self.clear_1_hour = ttk.Button(self.one_hour_body, text="Clear\nChart", command=lambda: one_hour.clear_chart(self))
         self.clear_1_hour.grid(row=11, column=5,  padx=(20, 0))
 
-        # places added chart on a label if it was uploaded in the past
+        # places added chart on a image-placeholder label if it was uploaded in the past
         def get_img(self):
             try:
                 if dict_data.st_values_holder.get("is_placed") == True:

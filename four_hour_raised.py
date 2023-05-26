@@ -11,7 +11,7 @@ import dict_data
 App_font = ("Sans-Serif", 13)
 Body_font = ("Sans-Serif", 9)
 
-# a four hour tab which holds some of the opeartions for uploading 4-hour charts
+# four hour tab which holds some of the opeartions for uploading 4-hour charts
 class four_hour(tk.Frame):
     def __init__(self, parent, controller):
         import mainpage_raised, fifteen_min_raised, one_hour_raised, result_raised

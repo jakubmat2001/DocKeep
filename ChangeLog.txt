@@ -1,7 +1,0 @@
-Doc Keep v1.21:
-
-What's New;
--Fixed the issue where the trade wouldn't be filed 
-if the worksheet with the same name has
-already been found in the workbook
--Increased the worksheet maximum name lenght to 15 chars.

@@ -1,10 +1,8 @@
-from tkinter import EXCEPTION, messagebox
-from tkinter import ttk, filedialog
-from tkinter.constants import END, INSERT
+from tkinter import messagebox
+from tkinter import ttk
 from PIL import ImageTk, Image
 import pickle
 import tkinter as tk
-import string
 import dict_data
 
 # various fonts used for label widgets

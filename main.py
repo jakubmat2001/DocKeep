@@ -1,10 +1,10 @@
 # Program Developed And Tested By; Jakub Matusik
-# Application Version; 1.2.2
-# 27/09/2021
+# Application Version; 1.2.3
+# 26/05/2023
 
 # list of libraries used in the application and their use
 # tkinter; building GUI for application
-# PIL; opening and resizing images
+# PIL; opening and resizing images (manipulating images)
 # openpyxl; opening/writing and reading execel files
 # requests; using html elements and requesting data from them
 # webbrowser; opening internet links
@@ -36,7 +36,8 @@ class dockeep(tk.Tk):
         container.grid_columnconfigure(0, weight=1)
 
         self.frames = {}
- 
+
+        # loop over every exisitng page in our app and display a tab 
         for f in (mainpage_raised.mainpage, four_hour_raised.four_hour, one_hour_raised.one_hour, fifteen_min_raised.fifteen_min, result_raised.result):
             frame = f(container, self)
             self.frames[f] = frame
@@ -46,6 +47,7 @@ class dockeep(tk.Tk):
         
         self.show_frame(mainpage_raised.mainpage)
 
+    # display a user selected tab
     def show_frame(self, cont):
         frame = self.frames[cont]
         frame_to_str = str(frame)

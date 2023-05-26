@@ -600,7 +600,7 @@ class mainpage(tk.Frame):
 
         # This function will use the scale and increment it by 500 each time user moves it
         # As I have used ttk insted of tk, it didn't have the same options as tk 
-        # therefore this function was necessary for program to work as I wanted it to
+
         def select_lotsize(self):
             self.int_lot_size_val = int(slider_val.get())
             for minNum, maxNum in lotsize_values:
