@@ -4,3 +4,10 @@ This project allows users to keep track of their losses/gains in the forex marke
 ## Key Features
 * Application will save the state of the trade once application is closed
 * Uses a real-exchange API for each of the currency pairs
+
+## Application GUI
+![image](https://github.com/jakubmat2001/DocKeep/assets/87088367/220a0a32-a38b-4183-b0ff-45ded0115f4f)
+
+
+## Filed Trade Sample
+![image](https://github.com/jakubmat2001/DocKeep/assets/87088367/be6a1a28-5e27-4628-95f0-4ab4625824c1)
