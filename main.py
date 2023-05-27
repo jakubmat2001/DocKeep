@@ -53,7 +53,15 @@ class dockeep(tk.Tk):
         frame_to_str = str(frame)
         frame.tkraise()
         if frame_to_str == ".!frame.!result":
-            result.update_lossgain(self)
+            frame.update_lossgain()
+        elif frame_to_str == ".!frame.!mainpage":
+            pass
+        elif frame_to_str == ".!frame.!four_hour":
+            pass
+        elif frame_to_str == ".!frame.!fifteen_min":
+            pass
+        elif frame_to_str == ".!frame.!one_hour":
+            pass
 
 if __name__ == "__main__":
     app = dockeep()

@@ -161,9 +161,12 @@ class result(tk.Frame):
         self.disp_result.config(image="", width=135, height=33, text="This Chart Is Currently Empty \nClick 'Upload Result Chart' To Add One")
 
     def update_lossgain(self):
-        print("hi Im result")
-
-
+        dict_data.filetrade = open("ft_data", "rb")
+        loss_gain = pickle.load(dict_data.filetrade)
+        loss_gain = loss_gain.get("loss-gain")
+        dict_data.filetrade.close()
+        self.result_lbl.config(text=str(loss_gain)) 
+        
     # operation which will export a trade into an excel file
     # user will be presented with a choice of either uploading data or not
     # data in dictionaries used by a user will be reset upon completion
@@ -175,7 +178,7 @@ class result(tk.Frame):
         start_vars = open("startup_vars", "rb")
         dict_data.get_dict_data = pickle.load(start_vars)
     
-    # validation checks ensuring user is away their result chart hasn't been uploaded
+    # validation checks ensuring user is aware that their result chart hasn't been uploaded
         result.validate_uploaded_chart(self)
         if self.cont_export == True:
             if dict_data.st_values_holder.get("is_placed") == False and dict_data.st_values_holder.get("is_trade_filed") == False:
@@ -209,10 +212,8 @@ class result(tk.Frame):
                     result.export(self)
                     
                     dict_data.reset_filedata_dict()
+                    # move back and display mainpage
                     controller.show_frame(mainpage_raised.mainpage)
-
-                    self.result_lbl.config(text=0)
-                    
                     
                 elif q2_answer is False:
 
