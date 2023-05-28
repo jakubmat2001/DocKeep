@@ -6,7 +6,7 @@ from openpyxl.styles import Alignment
 import pickle
 import tkinter as tk
 import pandas as pd
-import dict_data
+import retrivables.dict_data as dict_data
 import datetime
 
 App_font = ("Sans-Serif", 13)
@@ -16,7 +16,7 @@ Body_font = ("Sans-Serif", 9)
 # which is a way for a user to export their trade into an excel spreadsheet
 class result(tk.Frame):
     def __init__(self, parent, controller):
-        import  mainpage_raised ,four_hour_raised, one_hour_raised, fifteen_min_raised
+        import  pages.mainpage_raised as mainpage_raised ,pages.four_hour_raised as four_hour_raised, pages.one_hour_raised as one_hour_raised, pages.fifteen_min_raised as fifteen_min_raised
         tk.Frame.__init__(self, parent)
 
         self.test_img = ""
@@ -171,7 +171,7 @@ class result(tk.Frame):
     # user will be presented with a choice of either uploading data or not
     # data in dictionaries used by a user will be reset upon completion
     def file_trade(self, controller):
-        import mainpage_raised
+        import pages.mainpage_raised as mainpage_raised
         dict_data.filetrade = open("ft_data", "rb")
         dict_data.get_filedict_data = pickle.load(dict_data.filetrade)
 

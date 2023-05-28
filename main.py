@@ -14,12 +14,12 @@
 # this class will functions as a main application, displaying all of the tabs found in the application
 # when user clicks on the tab he wants to move too, the frame will be raised to the top
 import tkinter as tk
-import mainpage_raised
-import four_hour_raised
-import fifteen_min_raised
-import one_hour_raised
-import result_raised
-from result_raised import result
+import pages.mainpage_raised as mainpage_raised
+import pages.four_hour_raised as four_hour_raised
+import pages.fifteen_min_raised as fifteen_min_raised
+import pages.one_hour_raised as one_hour_raised
+import retrivables.result_raised as result_raised
+from retrivables.result_raised import result
 
 class dockeep(tk.Tk):
     def __init__(self, *args, **kwargs):

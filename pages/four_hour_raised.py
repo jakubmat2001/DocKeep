@@ -4,7 +4,7 @@ from tkinter.constants import END, INSERT
 from PIL import ImageTk, Image
 import pickle
 import tkinter as tk
-import dict_data
+import retrivables.dict_data as dict_data
 
 
 # various fonts used for label widgets
@@ -14,7 +14,7 @@ Body_font = ("Sans-Serif", 9)
 # four hour tab which holds some of the opeartions for uploading 4-hour charts
 class four_hour(tk.Frame):
     def __init__(self, parent, controller):
-        import mainpage_raised, fifteen_min_raised, one_hour_raised, result_raised
+        import pages.mainpage_raised as mainpage_raised, pages.fifteen_min_raised as fifteen_min_raised, pages.one_hour_raised as one_hour_raised, retrivables.result_raised as result_raised
         tk.Frame.__init__(self, parent)
 
         self.test_img = ""

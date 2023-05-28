@@ -3,12 +3,12 @@ from tkinter import EXCEPTION, messagebox
 from tkinter import ttk, filedialog
 from tkinter.constants import END, INSERT
 from PIL import ImageTk, Image
-from commondata import lotsize_values
+from retrivables.commondata import lotsize_values
 import webbrowser
 import pickle
 import tkinter as tk
 import string
-import dict_data
+import retrivables.dict_data as dict_data
 
 # various fonts used for label widgets
 App_font = ("Sans-Serif", 13)
@@ -17,7 +17,7 @@ Body_font = ("Sans-Serif", 9)
 # the main window of application that is going to be displayed upon application launch
 class mainpage(tk.Frame):
     def __init__(self, parent, controller):
-        import four_hour_raised, one_hour_raised, fifteen_min_raised, result_raised
+        import pages.four_hour_raised as four_hour_raised, pages.one_hour_raised as one_hour_raised, pages.fifteen_min_raised as fifteen_min_raised, retrivables.result_raised as result_raised
         tk.Frame.__init__(self, parent)
         
         # variables use to retrive data from multiple application UI forms/boxes
@@ -627,7 +627,7 @@ class mainpage(tk.Frame):
         # validation check is made whenever 'place trade' button has been clicked by a user
         # all of the paramters are then being saved into a dictionary for a later use
         def place_trade(self):
-            import commondata
+            import retrivables.commondata as commondata
             while self.validation_check is True:
                 check_currency_pair(self)
                 if commondata.send_data is True:
@@ -687,7 +687,7 @@ class mainpage(tk.Frame):
         # clouser exchange rate is being retrived whenever trades is being closed
         # followed by other functions being executed
         def close_trade(self):
-            import commondata
+            import retrivables.commondata as commondata
             bs = dict_data.placetrade_values_holder.get("buysell")
             if dict_data.placetrade_values_holder.get("pair") == "GBP/USD":
                 commondata.get_current_exchange_rate_gbp()
@@ -1068,7 +1068,7 @@ class mainpage(tk.Frame):
         # checks if the currency has been selected and than saves both the exchange-rate & currency pair into a dictionary for further use
         def check_currency_pair(self):
             bs = bs_radio_val.get()
-            import commondata
+            import retrivables.commondata as commondata
             commondata.get_current_exchange_rate_gbp()
             self.conversion = commondata.temp_exchange_gbp_usd
             if self.currency_pair_combo.get() == "":
@@ -1147,7 +1147,7 @@ class mainpage(tk.Frame):
                     self.validation_check = False
                 
         def check_if_equal_to_sl(self):
-            import commondata
+            import retrivables.commondata as commondata
             pos = dict_data.placetrade_values_holder.get("buysell")
             if dict_data.placetrade_values_holder.get("pair") == "EURO/USD":
                 commondata.get_currency_exchange_rate_euro_startup()
@@ -1188,7 +1188,7 @@ class mainpage(tk.Frame):
 
 
         def check_display_exchange_rate(self):
-            import commondata
+            import retrivables.commondata as commondata
             if self.currency_pair_combo.get() == "":
                 messagebox.showinfo("Select Pair", "Please Select Currency Pair")
                 disable_place_trade(self)

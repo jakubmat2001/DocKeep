@@ -3,7 +3,7 @@ from tkinter import ttk
 from PIL import ImageTk, Image
 import pickle
 import tkinter as tk
-import dict_data
+import retrivables.dict_data as dict_data
 
 # various fonts used for label widgets
 App_font = ("Sans-Serif", 13)
@@ -12,7 +12,7 @@ Body_font = ("Sans-Serif", 9)
 # a fifteen min tab which holds some of the opeartions for uploading 15-min charts
 class fifteen_min(tk.Frame):
     def __init__(self, parent, controller):
-        import mainpage_raised ,four_hour_raised, one_hour_raised, result_raised
+        import pages.mainpage_raised as mainpage_raised ,pages.four_hour_raised as four_hour_raised, pages.one_hour_raised as one_hour_raised, retrivables.result_raised as result_raised
         tk.Frame.__init__(self, parent)
 
         self.test_img = ""
