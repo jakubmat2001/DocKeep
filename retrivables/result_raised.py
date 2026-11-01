@@ -1,5 +1,4 @@
-from tkinter import messagebox
-from tkinter import ttk
+from tkinter import messagebox, filedialog, ttk
 from PIL import ImageTk, Image
 import openpyxl as pxl
 from openpyxl.styles import Alignment
@@ -8,6 +7,11 @@ import tkinter as tk
 import pandas as pd
 import retrivables.dict_data as dict_data
 import datetime
+from pathlib import Path
+import os
+import shutil
+import sys
+from .helpers import data_path
 
 App_font = ("Sans-Serif", 13)
 Body_font = ("Sans-Serif", 9)
@@ -32,40 +36,45 @@ class result(tk.Frame):
         self.cont_export = False
         
 
-        self.tabs_bar = tk.Frame(self, bg="#DC7979")
+        self.tabs_bar = tk.Frame(self, bg="#DC7979", width=110)
         self.tabs_bar.grid(row=0, column=0, sticky="we")
 
-        self.banner_lbl = tk.Label(self, text="Result",font=App_font ,width=120, height=5, bg="#BDBABA")
-        self.banner_lbl.grid(row=1, column=0 )
+        self.banner_lbl = tk.Label(self, text="Result",font=App_font ,width=110, height=5, bg="#BDBABA")
+        self.banner_lbl.grid(row=1, column=0, sticky="we")
 
         self.result_body = tk.Frame(self, bg="#FDFDFD", pady=20)
         self.result_body.grid(row=2, column=0, sticky="nsew", padx=(20,0))
 
-        self.button21 = tk.Button(self.tabs_bar, text="Main", command=lambda: controller.show_frame(mainpage_raised.mainpage), borderwidth=1, relief="solid")
+        self.button21 = tk.Button(self.tabs_bar, text="Main", command=lambda: controller.show_frame(mainpage_raised.mainpage), justify="center", 
+                                pady=3, borderwidth=1, relief="groove")
         self.button21.grid(row=0, column=1, padx=(5, 5), pady=(5, 5))
 
-        self.button22 = tk.Button(self.tabs_bar, text="4 Hour", command=lambda: controller.show_frame(four_hour_raised.four_hour), borderwidth=1, relief="solid")
+        self.button22 = tk.Button(self.tabs_bar, text="4 Hour", command=lambda: controller.show_frame(four_hour_raised.four_hour), justify="center", 
+                                pady=3, borderwidth=1, relief="groove")
         self.button22.grid(row=0, column=2, padx=(5, 5), pady=(5, 5))
 
-        self.button23 = tk.Button(self.tabs_bar, text="1 Hour", command=lambda: controller.show_frame(one_hour_raised.one_hour), borderwidth=1, relief="solid")
+        self.button23 = tk.Button(self.tabs_bar, text="1 Hour", command=lambda: controller.show_frame(one_hour_raised.one_hour), justify="center", 
+                                pady=3, borderwidth=1, relief="groove")
         self.button23.grid(row=0, column=3, padx=(5, 5), pady=(5, 5))
 
-        self.button24 = tk.Button(self.tabs_bar, text="15 Min", command=lambda: controller.show_frame(fifteen_min_raised.fifteen_min), borderwidth=1, relief="solid")
+        self.button24 = tk.Button(self.tabs_bar, text="15 Min", command=lambda: controller.show_frame(fifteen_min_raised.fifteen_min), justify="center", 
+                                pady=3, borderwidth=1, relief="groove")
         self.button24.grid(row=0, column=4, padx=(5, 5), pady=(5, 5))
 
-        self.button25 = tk.Button(self.tabs_bar, text="Result", command=lambda: controller.show_frame(result), borderwidth=1, relief="solid")
+        self.button25 = tk.Button(self.tabs_bar, text="Result", command=lambda: controller.show_frame(result), justify="center", 
+                                pady=3, borderwidth=1, relief="groove")
         self.button25.grid(row=0, column=5, padx=(5, 5), pady=(5, 5))
 
-        self.disp_result = tk.Label(self.result_body, width=135, height=33, image=self.test_img, text="This Chart Is Currently Empty \nClick 'Upload Result Chart' To Add One" ,relief="solid", borderwidth=1)
+        self.disp_result = tk.Label(self.result_body, width=110, height=33, image=self.test_img, text="This Chart Is Currently Empty \nClick 'Upload Result Chart' To Add One" ,relief="solid", borderwidth=1)
         self.disp_result.grid(rowspan=30, columnspan=5)
 
-        self.result_button = ttk.Button(self.result_body, text="       Add\nResult Chart", command=lambda: result.add_result(self))
+        self.result_button = tk.Button(self.result_body, text="Add\nResult Chart", command=lambda: result.add_result(self), justify="center")
         self.result_button.grid(row=14, column=5, padx=(20, 0))
 
-        self.upload_result = ttk.Button(self.result_body, text="    Upload\nResult Chart", state="disabled" ,command=lambda: result.upload_result(self))
+        self.upload_result = tk.Button(self.result_body, text="Upload\nResult Chart", state="disabled" ,command=lambda: result.upload_result(self), justify="center")
         self.upload_result.grid(row=15, column=5, sticky="E")
 
-        self.file_trade = ttk.Button(self.result_body, text="  File\nTrade", command=lambda:result.file_trade(self, controller))
+        self.file_trade = tk.Button(self.result_body, text="File\nTrade", command=lambda:result.file_trade(self, controller), justify="center")
         self.file_trade.grid(row=25, column=5, padx=(20,0))
 
         self.txt_result_lbl = ttk.Label(self.result_body, text="Loss/Gain")
@@ -84,13 +93,13 @@ class result(tk.Frame):
         # places added chart on a label if it was uploaded in the past
         def get_img(self):
             try:
-                dict_data.filetrade = open("ft_data", "rb")
+                dict_data.filetrade = open(data_path("ft_data"), "rb")
                 dict_data.get_filedict_data = pickle.load(dict_data.filetrade)
 
                 self.test_img = Image.open(dict_data.get_filedict_data.get("result-chart"))
                 self.resizingImg = self.test_img.resize((950, 490), Image.ANTIALIAS)
                 self.new_img = ImageTk.PhotoImage(self.resizingImg)
-                self.disp_result.config(width=950, height=490 ,image=self.new_img, text="")
+                self.disp_result.config(width=1000, height=530 ,image=self.new_img, text="")
             except Exception:
                 pass
 
@@ -99,30 +108,79 @@ class result(tk.Frame):
     
     # adds a result chart selected by a user
     def add_result(self):
-        start_vars = open("startup_vars", "rb")
-        dict_data.get_dict_data = pickle.load(start_vars)
-        if dict_data.st_values_holder.get("is_placed") == False and dict_data.st_values_holder.get("is_trade_filed") == False:
-            try:
-                filename = tk.filedialog.askopenfile(initialdir="Desktop", title="Select File", filetypes=(("PNG Files", "*.png"),("JPG Files", "*.jpg")))
-                dict_data.placetrade_values_holder["result-chart"] = filename.name
-                self.test_img = Image.open(dict_data.placetrade_values_holder.get("result-chart"))
-                self.resizingImg = self.test_img.resize((950, 490), Image.ANTIALIAS)
-                self.new_img = ImageTk.PhotoImage(self.resizingImg)
-                self.disp_result.config(width=950, height=490 ,image=self.new_img)
+        try:
+            if (not dict_data.st_values_holder.get("is_placed", False) and not dict_data.st_values_holder.get("is_trade_filed", False)):
+                filename = filedialog.askopenfilename(
+                    initialdir=str(Path.home() / "Desktop"),
+                    title="Select Result Chart",
+                    filetypes=[
+                        ("Image Files", "*.png *.jpg *.jpeg")
+                    ]
+                )
+                if not filename:
+                    return
+
+                # Store the image in DocKeep's persistent chart folder
+                if os.name == "nt":
+                    base = Path(os.environ.get("APPDATA", Path.home()))
+                elif sys.platform == "darwin":
+                    base = Path.home() / "Library" / "Application Support"
+                else:
+                    base = Path.home() / ".local" / "share"
+
+                chart_folder = base / "DocKeep" / "charts"
+                chart_folder.mkdir(parents=True, exist_ok=True)
+
+                source = Path(filename)
+                destination = chart_folder / "result-chart.png"
+                with Image.open(source) as image:
+                    image = image.convert("RGB")
+                    image.save(destination, format="PNG")
+
+                with Image.open(destination) as image:
+                    resized = image.resize(
+                        (1000, 530),
+                        getattr(Image, "Resampling", Image).LANCZOS
+                    )
+
+                self.new_img = ImageTk.PhotoImage(resized)
+
+                self.disp_result.config(
+                    width=1000,
+                    height=530,
+                    image=self.new_img,
+                    text=""
+                )
+
+                dict_data.placetrade_values_holder["result-chart"] = str(destination)
+
                 self.upload_result.config(state="normal")
-            except Exception:
-                messagebox.showinfo("Error", "Failed to load the image")
-        elif dict_data.st_values_holder.get("is_placed") == False and dict_data.st_values_holder.get("is_trade_filed") == True:
-            messagebox.showinfo("Trade", "You have already filed a trade")
-        else:
-            messagebox.showinfo("Trade", "You haven't closed your recent trade")
+
+            elif dict_data.st_values_holder.get("is_trade_filed"):
+                messagebox.showinfo(
+                    "Trade",
+                    "You have already filed a trade"
+                )
+
+            else:
+                messagebox.showinfo(
+                    "Trade",
+                    "You haven't closed your recent trade"
+                )
+
+        except Exception as e:
+            messagebox.showerror(
+                "Image Error",
+                f"Failed to load the image:\n\n{type(e).__name__}: {e}"
+            )
+            print("Result chart loading error:", repr(e))
 
     # uploads a result chart selected by a user
     def upload_result(self):
-        start_vars = open("startup_vars", "rb")
+        start_vars = open(data_path("startup_vars"), "rb")
         dict_data.get_dict_data = pickle.load(start_vars)
 
-        dict_data.filetrade = open("ft_data", "rb")
+        dict_data.filetrade = open(data_path("ft_data"), "rb")
         dict_data.get_filedict_data = pickle.load(dict_data.filetrade)
 
         if dict_data.placetrade_values_holder["result-chart"] != "" and dict_data.st_values_holder.get("is_placed") == True:
@@ -139,7 +197,7 @@ class result(tk.Frame):
             dict_data.fileload_values_to_filedata()
             dict_data.ft_data["result-chart"] = dict_data.st_values_holder.get("result-chart")
 
-            dict_data.filetrade = open("ft_data", "wb")
+            dict_data.filetrade = open(data_path("ft_data"), "wb")
             pickle.dump(dict_data.ft_data, dict_data.filetrade)
             dict_data.filetrade.close()
 
@@ -161,7 +219,7 @@ class result(tk.Frame):
         self.disp_result.config(image="", width=135, height=33, text="This Chart Is Currently Empty \nClick 'Upload Result Chart' To Add One")
 
     def update_lossgain(self):
-        dict_data.filetrade = open("ft_data", "rb")
+        dict_data.filetrade = open(data_path("ft_data"), "rb")
         loss_gain = pickle.load(dict_data.filetrade)
         loss_gain = loss_gain.get("loss-gain")
         dict_data.filetrade.close()
@@ -172,12 +230,11 @@ class result(tk.Frame):
     # data in dictionaries used by a user will be reset upon completion
     def file_trade(self, controller):
         import pages.mainpage_raised as mainpage_raised
-        dict_data.filetrade = open("ft_data", "rb")
+        dict_data.filetrade = open(data_path("ft_data"), "rb")
         dict_data.get_filedict_data = pickle.load(dict_data.filetrade)
 
-        start_vars = open("startup_vars", "rb")
+        start_vars = open(data_path("startup_vars"), "rb")
         dict_data.get_dict_data = pickle.load(start_vars)
-    
     # validation checks ensuring user is aware that their result chart hasn't been uploaded
         result.validate_uploaded_chart(self)
         if self.cont_export == True:
@@ -187,7 +244,7 @@ class result(tk.Frame):
 
                     result.check_if_exists(self)
 
-                    dict_data.filetrade = open("ft_data", "rb")
+                    dict_data.filetrade = open(data_path("ft_data"), "rb")
                     dict_data.get_filedict_data = pickle.load(dict_data.filetrade)
 
                     # load recently picked trade with it's parameters/values
@@ -204,7 +261,7 @@ class result(tk.Frame):
                     dict_data.placetrade_values_holder["result-chart"] = ""
 
                     # pickele-save our start-up values for later use (incase the app closes) 
-                    start_up = open("startup_vars", "wb")
+                    start_up = open(data_path("startup_vars"), "wb")
                     pickle.dump(dict_data.st_values_holder, start_up)
                     start_up.close()
 
@@ -231,7 +288,7 @@ class result(tk.Frame):
                     dict_data.placetrade_values_holder["result-chart"] = ""
 
                     # pickle-save our start-up values for later use (incase the app closes)
-                    start_up = open("startup_vars", "wb")
+                    start_up = open(data_path("startup_vars"), "wb")
                     pickle.dump(dict_data.st_values_holder, start_up)
                     start_up.close()
 
@@ -250,7 +307,7 @@ class result(tk.Frame):
 
     # check if the charts exist, if one or more do not exist, the chart that is missing will be set to NULL
     def check_if_exists(self):
-        dict_data.filetrade = open("ft_data", "rb")
+        dict_data.filetrade = open(data_path("ft_data"), "rb")
         dict_data.get_filedict_data = pickle.load(dict_data.filetrade)
         try:
             if dict_data.get_filedict_data.get("4-hour") != "":
@@ -260,7 +317,7 @@ class result(tk.Frame):
                     dict_data.fileload_values_to_filedata()
                     dict_data.ft_data["4-hour"] = ""
                     
-                    dict_data.filetrade = open("ft_data", "wb")
+                    dict_data.filetrade = open(data_path("ft_data"), "wb")
                     pickle.dump(dict_data.ft_data, dict_data.filetrade)
                     dict_data.filetrade.close()
             if dict_data.get_filedict_data.get("1-hour") != "":
@@ -270,7 +327,7 @@ class result(tk.Frame):
                     dict_data.fileload_values_to_filedata()
                     dict_data.ft_data["1-hour"] = ""
                     
-                    dict_data.filetrade = open("ft_data", "wb")
+                    dict_data.filetrade = open(data_path("ft_data"), "wb")
                     pickle.dump(dict_data.ft_data, dict_data.filetrade)
                     dict_data.filetrade.close()
             if dict_data.get_filedict_data.get("15-min") != "":
@@ -280,7 +337,7 @@ class result(tk.Frame):
                     dict_data.fileload_values_to_filedata()
                     dict_data.ft_data["15-min"] = ""
                     
-                    dict_data.filetrade = open("ft_data", "wb")
+                    dict_data.filetrade = open(data_path("ft_data"), "wb")
                     pickle.dump(dict_data.ft_data, dict_data.filetrade)
                     dict_data.filetrade.close()
             if dict_data.get_filedict_data.get("result-chart") != "":
@@ -290,7 +347,7 @@ class result(tk.Frame):
                     dict_data.fileload_values_to_filedata()
                     dict_data.ft_data["result-chart"] = ""
                     
-                    dict_data.filetrade = open("ft_data", "wb")
+                    dict_data.filetrade = open(data_path("ft_data"), "wb")
                     pickle.dump(dict_data.ft_data, dict_data.filetrade)
                     dict_data.filetrade.close()
         except Exception:
@@ -303,13 +360,13 @@ class result(tk.Frame):
     # else if the workbook does exist, it creates new worksheet with current date and number representing the total of existing worhseets within the workbook
     # charts & cells are resized to fit in the resized excel cell, if any chart is missing, they will end-up not beeing uploaded
     def export(self):
-        with open("ft_data", "rb") as filetrade:
+        with open(data_path("ft_data"), "rb") as filetrade:
             dict_data.get_filedict_data = pickle.load(filetrade)
 
         current_date_time = datetime.datetime.now()
         formatted_year = str(current_date_time.year)[2:]
         current_date = str(current_date_time.day) + "-" + str(current_date_time.month) + "-" + formatted_year
-        filename = 'ForexTrades.xlsx'
+        filename = str(data_path("ForexTrades.xlsx"))
 
     # checks if the sheetname with a current date already exisits within the workbook
     # if sheet name does exist, new name is assigned to it with a current date and number count representing the ith trade placed on that day
@@ -339,7 +396,7 @@ class result(tk.Frame):
                 '1-hour': [dict_data.ready_for_export.get("1-hour")], '15-min': [dict_data.ready_for_export.get("15-min")], 'Result': [dict_data.ready_for_export.get("Result-chart")]}
         
         df = pd.DataFrame(data)
-        df.to_excel(writer, sheet_name, index=False)
+        df.to_excel(writer, sheet_name=sheet_name, index=False)
         worksheet = writer.sheets[sheet_name]
 
         try:

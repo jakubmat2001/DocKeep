@@ -1,4 +1,5 @@
 import pickle
+from .helpers import data_path
 
 # dictionary which will hold all of the parameters for further use in the program
 placetrade_values_holder = {
@@ -97,7 +98,7 @@ ready_for_export = {
 
 # transfers all of the data entered by a user and prepares it for a potential export
 def export_data():
-    filetrade = open("ft_data", "rb")
+    filetrade = open(data_path("ft_data"), "rb")
     get_filedict_data = pickle.load(filetrade)
 
     ready_for_export["Pair"] = get_filedict_data.get("pair")
@@ -123,7 +124,7 @@ def export_data():
 # transfers all the data from value holder into a dictionary which loads vars upon program initiation
 # Used whenever user closes program and then opens it up again to change one or more charts
 def placetrade_values_to_startup():
-    start_vars = open("startup_vars", "rb")
+    start_vars = open(data_path("startup_vars"), "rb")
     get_dict_data = pickle.load(start_vars)
 
     st_values_holder["pair"] = placetrade_values_holder.get("pair")
@@ -149,7 +150,7 @@ def placetrade_values_to_startup():
     
 # loads up data from a dictionary saved in the separate
 def fileload_values_to_filedata():
-    filetrade = open("ft_data", "rb")
+    filetrade = open(data_path("ft_data"), "rb")
     get_filedict_data = pickle.load(filetrade)
 
     ft_data["pair"] = get_filedict_data.get("pair")
@@ -215,7 +216,7 @@ def placetrade_values_to_filedata():
 
 # transfers all of the data loaded up from a separate file into startup dictionary
 def startup_load_values_to_startup():
-    start_vars = open("startup_vars", "rb")
+    start_vars = open(data_path("startup_vars"), "rb")
     get_dict_data = pickle.load(start_vars)
 
     st_values_holder["pair"] = get_dict_data.get("pair")
@@ -259,7 +260,7 @@ def reset_filedata_dict():
     ft_data["Bid"] = 0.0
     ft_data["Ask"] = 0.0
 
-    filetrade = open("ft_data", "wb")
+    filetrade = open(data_path("ft_data"), "wb")
     pickle.dump(ft_data, filetrade)
     filetrade.close()
 
@@ -284,12 +285,41 @@ def reset_dataframe_dict():
     ready_for_export["Bid"] = 0
     ready_for_export["Ask"] = 0
 
+def load_pickle_dict(filename, defaults):
+    path = data_path(filename)
 
-start_vars = open("startup_vars", "rb")
-get_dict_data = pickle.load(start_vars)
+    try:
+        with open(path, "rb") as file:
+            loaded_data = pickle.load(file)
 
-filetrade = open("ft_data", "rb")
-get_filedict_data = pickle.load(filetrade)
+        if not isinstance(loaded_data, dict):
+            raise ValueError(f"{filename} does not contain a dictionary")
+
+        # Add any new keys that may be missing from an older saved file
+        data = defaults.copy()
+        data.update(loaded_data)
+        return data
+
+    except (FileNotFoundError, EOFError, pickle.UnpicklingError,
+            ValueError, OSError):
+        # Preserve a damaged file for inspection, if one exists
+        if path.exists() and path.stat().st_size > 0:
+            backup_path = path.with_name(path.name + ".corrupt")
+            if not backup_path.exists():
+                path.replace(backup_path)
+
+        # Create a fresh file with default values
+        data = defaults.copy()
+        with open(path, "wb") as file:
+            pickle.dump(data, file)
+
+        return data
+
+start_vars = open(data_path("startup_vars"), "rb")
+filetrade = open(data_path("ft_data"), "rb")
+
+get_dict_data = load_pickle_dict("startup_vars", st_values_holder)
+get_filedict_data = load_pickle_dict("ft_data", ft_data)
 
 is_trade_placed = get_dict_data.get("is_placed")
 is_trade_filed = get_dict_data.get("is_trade_filed")

@@ -28,11 +28,11 @@ send_data = False
 
 # Once user clicked on the update exchange button
 # request will be sent to the AVS to get most up-to-date exchange rate for the selected pair
-# maximum of 5 requests per minute and 500 per day can be made
+# maximum of 5 requests per minute and 25 per day can be made
 def get_current_exchange_rate_gbp():
     try:
         global temp_exchange_gbp_usd, send_data, gu_bid, gu_ask
-        api_key = "1N5JIIFORU76E7ZJ"
+        api_key = "Y3A26UNIXKXZ00OE"
          
         app = ForeignExchange(key=api_key, output_format="json")
         gbp_usd = app.get_currency_exchange_rate(from_currency="GBP", to_currency="USD")
@@ -58,6 +58,7 @@ def get_current_exchange_rate_gbp():
         send_data = True
         return temp_exchange_gbp_usd, send_data, gu_ask, gu_bid
     except Exception:
+        print(Exception)
         messagebox.showinfo("Error", "Please Check If You're Connected To Internet\n Otherwise Please Wait 15 Sec And Try Again")
         send_data = False
         return send_data
@@ -170,7 +171,7 @@ def get_aud_usd_exchange_rate():
 def get_current_exchange_rate_gbp_startup():
     try:
         global temp_exchange_gbp_usd, send_data, gu_bid, gu_ask
-        api_key = "1N5JIIFORU76E7ZJ"
+        api_key = "Y3A26UNIXKXZ00OE"
          
         app = ForeignExchange(key=api_key, output_format="json")
         gbp_usd = app.get_currency_exchange_rate(from_currency="GBP", to_currency="USD")
@@ -196,6 +197,7 @@ def get_current_exchange_rate_gbp_startup():
         send_data = True
         return temp_exchange_gbp_usd, send_data, gu_ask, gu_bid
     except Exception:
+        print(Exception)
         messagebox.showinfo("Error", "Error occurred when checking the exchange-rate ")
         send_data = False
         return send_data

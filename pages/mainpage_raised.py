@@ -9,6 +9,8 @@ import pickle
 import tkinter as tk
 import string
 import retrivables.dict_data as dict_data
+from retrivables.helpers import data_path
+
 
 # various fonts used for label widgets
 App_font = ("Sans-Serif", 13)
@@ -22,6 +24,7 @@ class mainpage(tk.Frame):
         
         # variables use to retrive data from multiple application UI forms/boxes
         balance_val = tk.DoubleVar(value=(dict_data.get_dict_data["balance"]))
+
         slider_val = tk.IntVar()
         slider_entry_box = tk.IntVar()
         ld_radio_val = tk.IntVar()
@@ -68,16 +71,16 @@ class mainpage(tk.Frame):
         self.conversion = 0
 
         # main page frames
-        self.tabs_bar = tk.Frame(self, bg="#DC7979")
+        self.tabs_bar = tk.Frame(self, bg="#DC7979", width=110)
         self.tabs_bar.grid(row=0, column=0, sticky="we")
 
-        self.banner_lbl = tk.Label(self, text="Doc Keep Page",font=App_font ,width=120, height=5, bg="#BDBABA")
+        self.banner_lbl = tk.Label(self, text="Doc Keep Page",font=App_font ,width=110, height=5, bg="#BDBABA")
         self.banner_lbl.grid(row=1, column=0, sticky="we")
 
         self.main_body = tk.Frame(self, bg="#FDFDFD")
         self.main_body.grid(row=2, column=0, sticky="nsew")
 
-        self.bottom_tab = tk.Frame(self, bg="#DC7979", height=35, width=10)
+        self.bottom_tab = tk.Frame(self, bg="#DC7979", height=35, width=110)
         self.bottom_tab.grid(row=3, column=0, sticky="we") 
         
         self.radio_buy_sell = tk.Frame(self.main_body, bg="#FDFDFD")
@@ -85,19 +88,24 @@ class mainpage(tk.Frame):
         
 
         # buttons
-        self.button = tk.Button(self.tabs_bar, text="Main" ,command=lambda: controller.show_frame(mainpage), borderwidth=1, relief="solid")
+        self.button = tk.Button(self.tabs_bar, text="Main", command=lambda: controller.show_frame(mainpage), justify="center", 
+                                pady=3, borderwidth=1, relief="groove")
         self.button.grid(row=0, column=1, padx=(5, 5), pady=(5, 5))
 
-        self.button2 = tk.Button(self.tabs_bar, text="4 Hour", command=lambda: controller.show_frame(four_hour_raised.four_hour), borderwidth=1, relief="solid")
+        self.button2 = tk.Button(self.tabs_bar, text="4 Hour", command=lambda: controller.show_frame(four_hour_raised.four_hour), justify="center", 
+                                pady=3, borderwidth=1, relief="groove")
         self.button2.grid(row=0, column=2, padx=(5, 5), pady=(5, 5))
 
-        self.button3 = tk.Button(self.tabs_bar, text="1 Hour", command=lambda: controller.show_frame(one_hour_raised.one_hour), borderwidth=1, relief="solid")
+        self.button3 = tk.Button(self.tabs_bar, text="1 Hour", command=lambda: controller.show_frame(one_hour_raised.one_hour), 
+                                 justify="center", pady=3, borderwidth=1, relief="groove")
         self.button3.grid(row=0, column=3, padx=(5, 5), pady=(5, 5))
 
-        self.button4 = tk.Button(self.tabs_bar, text="15 Min", command=lambda: controller.show_frame(fifteen_min_raised.fifteen_min), borderwidth=1, relief="solid")
+        self.button4 = tk.Button(self.tabs_bar, text="15 Min", command=lambda: controller.show_frame(fifteen_min_raised.fifteen_min), justify="center", 
+                                pady=3, borderwidth=1, relief="groove")
         self.button4.grid(row=0, column=4, padx=(5, 5), pady=(5, 5))
 
-        self.button5 = tk.Button(self.tabs_bar, text="Result", command=lambda: controller.show_frame(result_raised.result), borderwidth=1, relief="solid")
+        self.button5 = tk.Button(self.tabs_bar, text="Result", command=lambda: controller.show_frame(result_raised.result), justify="center", 
+                                pady=3, borderwidth=1, relief="groove")
         self.button5.grid(row=0, column=5, padx=(5, 5), pady=(5, 5))
 
         # Upper most section of gui / balance modification & light and dark mode
@@ -122,8 +130,13 @@ class mainpage(tk.Frame):
         self.exchange_rate_box = tk.Label(self.main_body, width=8, borderwidth=1, relief="sunken")
         self.exchange_rate_box.grid(row=2, column=0, padx=(10,0), pady=(10,0))
 
-        self.update_exchange_button = ttk.Button(self.main_body, text="       Update\nExchange-Rate", command=lambda:display_exchange_rate(self))
+        self.update_exchange_button = tk.Button(self.main_body, text="Update\nExchange-Rate", command=lambda:display_exchange_rate(self), justify="center",
+            pady=5, highlightbackground="#FDFDFD", borderwidth=1, relief="groove"
+        )
         self.update_exchange_button.grid(row=3, column=0, padx=(10,0), pady=(0,40))
+
+        style = ttk.Style()
+        style.configure("TButton", justify="center")
 
         self.curreny_pair_lbl = tk.Label(self.main_body, text="Now Showing:", font=Body_font,  bg="#FDFDFD")
         self.curreny_pair_lbl.grid(row=1, column=2, padx=(15,0), pady=(100,0))
@@ -141,14 +154,15 @@ class mainpage(tk.Frame):
         self.lot_size_scale = ttk.Scale(self.main_body, orient=tk.HORIZONTAL,variable=slider_val ,from_=0, to=10000, length=130, command=lambda x:select_lotsize(self))
         self.lot_size_scale.grid(row=3, column=3, padx=(80,0), pady=(0,80))
 
-        self.upload_charts = ttk.Button(self.main_body, text="Upload\n Charts", command=lambda: upload_all_charts(self))
+        self.upload_charts = tk.Button(self.main_body, text="Upload\n Charts", command=lambda: upload_all_charts(self))
         self.upload_charts.grid(row=2, column=6, padx=(0, 0), pady=(35, 0))
 
         #bottom section gui / place trade, close trade, buy & sell positions
-        self.place_trade_button = ttk.Button(self.main_body, text="Place\nTrade", command=lambda:place_trade(self), state="disabled")
+        self.place_trade_button = tk.Button(self.main_body, text="Place\nTrade", command=lambda:place_trade(self), state="disabled", 
+                                              justify="center", borderwidth=1, relief="groove")
         self.place_trade_button.grid(row=4, column=0, pady=(20,0))
 
-        self.close_trade_button = ttk.Button(self.main_body, text="Close\nTrade", command=lambda:close_trade(self))
+        self.close_trade_button = tk.Button(self.main_body, text="Close\nTrade", command=lambda:close_trade(self))
         self.close_trade_button.grid(row=5, column=0, pady=(20,50))
 
         self.buy_sell_lbl = tk.Label(self.radio_buy_sell, text="Select Position")
@@ -181,7 +195,7 @@ class mainpage(tk.Frame):
         self.guide_lbl = tk.Label(self.main_body, text="Video Guide", font=Body_font, bg="#FDFDFD")
         self.guide_lbl.grid(row=4, column=6)
 
-        self.guide_button = ttk.Button(self.main_body, text="  Video  \nTutorial", command= lambda: yt_link(self) )
+        self.guide_button = tk.Button(self.main_body, text="Video\nTutorial", command= lambda: yt_link(self) )
         self.guide_button.grid(row=5, column=6, pady=(0, 70))
 
 
@@ -201,9 +215,8 @@ class mainpage(tk.Frame):
                         dict_data.st_values_holder["TP"] = 0.0
                         dict_data.placetrade_values_holder["TP"] = 0.0
 
-                        start_up = open("startup_vars", "wb")
-                        pickle.dump(dict_data.st_values_holder, start_up)
-                        start_up.close()
+                        with open(data_path("startup_vars"), "wb") as start_up:
+                            pickle.dump(dict_data.st_values_holder, start_up)
                         messagebox.showinfo("TP Reset", "TP has been removed")
                     elif len(self.tp_box.get()) < 7:
                         messagebox.showinfo("TP Invalid Input", "      Please enter valid exchange rate \nExchange rate needs to be 7 characters long")
@@ -231,9 +244,8 @@ class mainpage(tk.Frame):
                             dict_data.st_values_holder["TP"] = round(self.tp_val, 5)
                             dict_data.placetrade_values_holder["TP"] = round(self.tp_val, 5)
 
-                            start_up = open("startup_vars", "wb")
-                            pickle.dump(dict_data.st_values_holder, start_up)
-                            start_up.close()
+                            with open(data_path("startup_vars"), "wb") as start_up:
+                                pickle.dump(dict_data.st_values_holder, start_up)
                             messagebox.showinfo("TP Changed", "TP has been changed to " + str(self.tp_val))
                 except Exception:
                     messagebox.showinfo("TP Error", "Something went wrong" + "\nReseting TP to default values")
@@ -241,9 +253,8 @@ class mainpage(tk.Frame):
                     dict_data.st_values_holder["TP"] = 0.0
                     dict_data.placetrade_values_holder["TP"] = 0.0
 
-                    start_up = open("startup_vars", "wb")
-                    pickle.dump(dict_data.st_values_holder, start_up)
-                    start_up.close()
+                    with open(data_path("startup_vars"), "wb") as start_up:
+                        pickle.dump(dict_data.st_values_holder, start_up)
                     self.tp_box.delete(0, END)
                     self.tp_box.insert(0, "0.0")
             except Exception:
@@ -266,9 +277,8 @@ class mainpage(tk.Frame):
                         dict_data.st_values_holder["SL"] = 0.0
                         dict_data.placetrade_values_holder["SL"] = 0.0
 
-                        start_up = open("startup_vars", "wb")
-                        pickle.dump(dict_data.st_values_holder, start_up)
-                        start_up.close()
+                        with open(data_path("startup_vars"), "wb") as start_up:
+                            pickle.dump(dict_data.st_values_holder, start_up)
                         messagebox.showinfo("SL Reset", "SL has been removed")
                     elif len(self.sl_box.get()) < 7:
                         messagebox.showinfo("SL Invalid Input", "      Please enter valid exchange rate \nExchange rate needs to be 7 characters long")
@@ -293,9 +303,8 @@ class mainpage(tk.Frame):
                             dict_data.placetrade_values_holder["SL"] = round(self.sl_val, 5)
                             
                             
-                            start_up = open("startup_vars", "wb")
-                            pickle.dump(dict_data.st_values_holder, start_up)
-                            start_up.close()
+                            with open(data_path("startup_vars"), "wb") as start_up:
+                                pickle.dump(dict_data.st_values_holder, start_up)
                             messagebox.showinfo("SL Changed", "SL has been changed to " + str(self.sl_val))
                 except Exception:
                     messagebox.showinfo("SL Error", "Something went wrong" + "\nReseting SL to default values")
@@ -303,9 +312,8 @@ class mainpage(tk.Frame):
                     dict_data.st_values_holder["SL"] = 0.0
                     dict_data.placetrade_values_holder["SL"] = 0.0
 
-                    start_up = open("startup_vars", "wb")
-                    pickle.dump(dict_data.st_values_holder, start_up)
-                    start_up.close()
+                    with open(data_path("startup_vars"), "wb") as start_up:
+                        pickle.dump(dict_data.st_values_holder, start_up)
                     self.sl_box.delete(0, END) 
                     self.sl_box.insert(0, "0.0")
             except Exception:
@@ -457,7 +465,7 @@ class mainpage(tk.Frame):
             bal_popup.title("Modify Balance")
             bal_popup.geometry("250x150")
             
-            bal_popup_lbl = tk.Label(bal_popup, text="Enter Balance To Your Account")
+            bal_popup_lbl = tk.Label(bal_popup, text="Enter Your Current Account Balance")
             bal_popup_lbl.pack(pady=5)
 
             error_popup_lbl = tk.Label(bal_popup, text="")
@@ -487,9 +495,8 @@ class mainpage(tk.Frame):
                     dict_data.placetrade_values_holder["balance"] = round(balance_val.get(), 2)
 
                     dict_data.st_values_holder["balance"] = dict_data.placetrade_values_holder.get("balance")
-                    start_up = open("startup_vars", "wb")
-                    pickle.dump(dict_data.st_values_holder, start_up)
-                    start_up.close()
+                    with open(data_path("startup_vars"), "wb") as start_up:
+                        pickle.dump(dict_data.st_values_holder, start_up)
                     
                     enable_modify_balance(self)
                     bal_popup.destroy()
@@ -555,9 +562,8 @@ class mainpage(tk.Frame):
                 dict_data.st_values_holder["pos-size"] = dict_data.placetrade_values_holder.get("pos-size")
                 dict_data.st_values_holder["balance"] = dict_data.placetrade_values_holder.get("balance")
 
-                start_up = open("startup_vars", "wb")
-                pickle.dump(dict_data.st_values_holder, start_up)
-                start_up.close()
+                with open(data_path("startup_vars"), "wb") as start_up:
+                    pickle.dump(dict_data.st_values_holder, start_up)
 
                 self.text_box.config(text=("£" + str(round(dict_data.placetrade_values_holder.get("balance"), 2))))
                 balance_val.set(dict_data.placetrade_values_holder.get("balance"))
@@ -666,9 +672,8 @@ class mainpage(tk.Frame):
                             dict_data.is_trade_placed = True
                             dict_data.st_values_holder["is_placed"] = True
 
-                            start_up = open("startup_vars", "wb")
-                            pickle.dump(dict_data.st_values_holder, start_up)
-                            start_up.close()
+                            with open(data_path("startup_vars"), "wb") as start_up:
+                                pickle.dump(dict_data.st_values_holder, start_up)
                             place_trade_operations(self)
                 break
 
@@ -789,9 +794,8 @@ class mainpage(tk.Frame):
                     dict_data.st_values_holder["loss-gain"] = dict_data.placetrade_values_holder.get("loss-gain")
                     dict_data.st_values_holder["balance"] = dict_data.placetrade_values_holder.get("balance")
 
-                    start_up = open("startup_vars", "wb")
-                    pickle.dump(dict_data.st_values_holder, start_up)
-                    start_up.close()
+                    with open(data_path("startup_vars"), "wb") as start_up:
+                        pickle.dump(dict_data.st_values_holder, start_up)
                     self.validate_result_check = True
                     print("TP Triggered Close > Open")
 
@@ -815,9 +819,8 @@ class mainpage(tk.Frame):
                     dict_data.st_values_holder["loss-gain"] = dict_data.placetrade_values_holder.get("loss-gain")
                     dict_data.st_values_holder["balance"] = dict_data.placetrade_values_holder.get("balance")
 
-                    start_up = open("startup_vars", "wb")
-                    pickle.dump(dict_data.st_values_holder, start_up)
-                    start_up.close()
+                    with open(data_path("startup_vars"), "wb") as start_up:
+                        pickle.dump(dict_data.st_values_holder, start_up)
                     self.validate_result_check = True
                     print("Normal Close > Open")
 
@@ -843,9 +846,8 @@ class mainpage(tk.Frame):
                     dict_data.st_values_holder["loss-gain"] = dict_data.placetrade_values_holder.get("loss-gain")
                     dict_data.st_values_holder["balance"] = dict_data.placetrade_values_holder.get("balance")
 
-                    start_up = open("startup_vars", "wb")
-                    pickle.dump(dict_data.st_values_holder, start_up)
-                    start_up.close()
+                    with open(data_path("startup_vars"), "wb") as start_up:
+                        pickle.dump(dict_data.st_values_holder, start_up)
                     self.validate_result_check = True
                     print("SL Triggered Close > Open")
 
@@ -868,17 +870,15 @@ class mainpage(tk.Frame):
                     dict_data.st_values_holder["loss-gain"] = dict_data.placetrade_values_holder.get("loss-gain")
                     dict_data.st_values_holder["balance"] = dict_data.placetrade_values_holder.get("balance")
 
-                    start_up = open("startup_vars", "wb")
-                    pickle.dump(dict_data.st_values_holder, start_up)
-                    start_up.close()
+                    with open(data_path("startup_vars"), "wb") as start_up:
+                        pickle.dump(dict_data.st_values_holder, start_up)
                     self.validate_result_check = True
                     print("Normal Close > Open")
                     
                     
                 dict_data.placetrade_values_to_filedata()
-                dict_data.filetrade = open("ft_data", "wb")
-                pickle.dump(dict_data.ft_data, dict_data.filetrade)
-                dict_data.filetrade.close()
+                with open(data_path("ft_data"), "wb") as filetrade:
+                    pickle.dump(dict_data.ft_data, filetrade)
 
                 
             if dict_data.placetrade_values_holder.get("open") > dict_data.placetrade_values_holder.get("close"):
@@ -902,9 +902,8 @@ class mainpage(tk.Frame):
                     dict_data.st_values_holder["loss-gain"] = dict_data.placetrade_values_holder.get("loss-gain")
                     dict_data.st_values_holder["balance"] = dict_data.placetrade_values_holder.get("balance")
 
-                    start_up = open("startup_vars", "wb")
-                    pickle.dump(dict_data.st_values_holder, start_up)
-                    start_up.close()
+                    with open(data_path("startup_vars"), "wb") as start_up:
+                        pickle.dump(dict_data.st_values_holder, start_up)
                     self.validate_result_check = True
                     print("SL Triggered Open > Close")
                 
@@ -925,9 +924,8 @@ class mainpage(tk.Frame):
                     dict_data.st_values_holder["loss-gain"] = dict_data.placetrade_values_holder.get("loss-gain")
                     dict_data.st_values_holder["balance"] = dict_data.placetrade_values_holder.get("balance")
 
-                    start_up = open("startup_vars", "wb")
-                    pickle.dump(dict_data.st_values_holder, start_up)
-                    start_up.close()
+                    with open(data_path("startup_vars"), "wb") as start_up:
+                        pickle.dump(dict_data.st_values_holder, start_up)
                     self.validate_result_check = True
                     print("Normal Open > Close")
                     
@@ -951,9 +949,8 @@ class mainpage(tk.Frame):
                     dict_data.st_values_holder["loss-gain"] = dict_data.placetrade_values_holder.get("loss-gain")
                     dict_data.st_values_holder["balance"] = dict_data.placetrade_values_holder.get("balance")
 
-                    start_up = open("startup_vars", "wb")
-                    pickle.dump(dict_data.st_values_holder, start_up)
-                    start_up.close()
+                    with open(data_path("startup_vars"), "wb") as start_up:
+                        pickle.dump(dict_data.st_values_holder, start_up)
                     self.validate_result_check = True
                     print("TP Triggered Open > Close")
 
@@ -976,16 +973,14 @@ class mainpage(tk.Frame):
                     dict_data.st_values_holder["loss-gain"] = dict_data.placetrade_values_holder.get("loss-gain")
                     dict_data.st_values_holder["balance"] = dict_data.placetrade_values_holder.get("balance")
 
-                    start_up = open("startup_vars", "wb")
-                    pickle.dump(dict_data.st_values_holder, start_up)
-                    start_up.close()
+                    with open(data_path("startup_vars"), "wb") as start_up:
+                        pickle.dump(dict_data.st_values_holder, start_up)
                     self.validate_result_check = True
                     print("Normal Open > Close")
 
                 dict_data.placetrade_values_to_filedata()
-                dict_data.filetrade = open("ft_data", "wb")
-                pickle.dump(dict_data.ft_data, dict_data.filetrade)
-                dict_data.filetrade.close()
+                with open(data_path("ft_data"), "wb") as filetrade:
+                    pickle.dump(dict_data.ft_data, filetrade)
                 
                 
             if dict_data.placetrade_values_holder.get("open") == dict_data.placetrade_values_holder.get("close") and self.validate_result_check == False:
@@ -1005,16 +1000,14 @@ class mainpage(tk.Frame):
                     dict_data.st_values_holder["loss-gain"] = dict_data.placetrade_values_holder.get("loss-gain")
                     dict_data.st_values_holder["balance"] = dict_data.placetrade_values_holder.get("balance")
 
-                    start_up = open("startup_vars", "wb")
-                    pickle.dump(dict_data.st_values_holder, start_up)
-                    start_up.close()
+                    with open(data_path("startup_vars"), "wb") as start_up:
+                        pickle.dump(dict_data.st_values_holder, start_up)
                     self.validate_result_check = True
             
                     
                 dict_data.placetrade_values_to_filedata()
-                dict_data.filetrade = open("ft_data", "wb")
-                pickle.dump(dict_data.ft_data, dict_data.filetrade)
-                dict_data.filetrade.close()
+                with open(data_path("ft_data"), "wb") as filetrade:
+                    pickle.dump(dict_data.ft_data, filetrade)
             self.validate_result_check = False
                 
                 
@@ -1149,6 +1142,8 @@ class mainpage(tk.Frame):
         def check_if_equal_to_sl(self):
             import retrivables.commondata as commondata
             pos = dict_data.placetrade_values_holder.get("buysell")
+            if (float(dict_data.placetrade_values_holder.get("SL")) == 0.0):
+                return
             if dict_data.placetrade_values_holder.get("pair") == "EURO/USD":
                 commondata.get_currency_exchange_rate_euro_startup()
                 self.updated_exchange_rate = commondata.temp_exchange_euro_usd
@@ -1276,16 +1271,14 @@ class mainpage(tk.Frame):
                 else:
                     dict_data.placetrade_values_to_startup()
                     
-                    start_up = open("startup_vars", "wb")
-                    pickle.dump(dict_data.st_values_holder, start_up)
-                    start_up.close()
+                    with open(data_path("startup_vars"), "wb") as start_up:
+                        pickle.dump(dict_data.st_values_holder, start_up)
                     messagebox.showinfo("Updated", "Charts Were Successfully Uploaded")
             elif dict_data.placetrade_values_holder["4-hour"] != "" and dict_data.placetrade_values_holder["1-hour"] != "" and dict_data.placetrade_values_holder["15-min"] != "":
                 dict_data.placetrade_values_to_startup()
                     
-                start_up = open("startup_vars", "wb")
-                pickle.dump(dict_data.st_values_holder, start_up)
-                start_up.close()
+                with open(data_path("startup_vars"), "wb") as start_up:
+                    pickle.dump(dict_data.st_values_holder, start_up)
                 messagebox.showinfo("Updated", "Charts Were Successfully Uploaded")
             else:
                 messagebox.showinfo("No Charts", "You haven't selected any charts to upload")
